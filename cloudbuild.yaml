@@ -1,0 +1,49 @@
+steps:
+  # Install Node.js dependencies
+  - name: 'node:18'
+    entrypoint: 'npm'
+    args: ['install', '--legacy-peer-deps']
+    dir: '.'
+
+  # Create JavaScript bundle
+  - name: 'node:18'
+    entrypoint: 'npx'
+    args:
+      - 'react-native'
+      - 'bundle'
+      - '--platform'
+      - 'android'
+      - '--dev'
+      - 'false'
+      - '--entry-file'
+      - 'index.js'
+      - '--bundle-output'
+      - 'android/app/src/main/assets/index.android.bundle'
+      - '--assets-dest'
+      - 'android/app/src/main/res'
+    dir: '.'
+
+  # Build Android APK
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'run'
+      - '--rm'
+      - '-v'
+      - '${PWD}:/workspace'
+      - '-w'
+      - '/workspace'
+      - 'cimg/android:2023.07'
+      - 'bash'
+      - '-c'
+      - |
+        cd android
+        chmod +x gradlew
+        ./gradlew assembleRelease --no-daemon
+
+# Store the APK as build artifact
+artifacts:
+  objects:
+    location: 'gs://memory-lane-app-469523-builds'
+    paths: ['android/app/build/outputs/apk/release/*.apk']
+
+timeout: 1200s

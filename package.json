@@ -1,0 +1,45 @@
+{
+  "name": "LegacyHonored",
+  "displayName": "Legacy Honored",
+  "version": "1.0.0",
+  "description": "Technology that honors your life's work",
+  "main": "index.js",
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "test": "jest",
+    "build": "cd android && ./gradlew bundleRelease"
+  },
+  "keywords": [
+    "react-native",
+    "medication",
+    "seniors",
+    "accessibility",
+    "voice"
+  ],
+  "author": "Elsbeth Seymour",
+  "license": "MIT",
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@react-native-voice/voice": "^3.2.4",
+    "@react-native/metro-config": "^0.81.1",
+    "@react-navigation/bottom-tabs": "^7.4.7",
+    "@react-navigation/native": "^7.1.17",
+    "react": "18.2.0",
+    "react-native": "0.72.4",
+    "react-native-safe-area-context": "^5.6.1",
+    "react-native-screens": "^4.16.0",
+    "react-native-tts": "^4.1.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.22.5",
+    "@babel/runtime": "^7.22.5",
+    "babel-plugin-module-resolver": "^5.0.2",
+    "metro-react-native-babel-preset": "0.72.3",
+    "typescript": "^5.1.6"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
