@@ -1,0 +1,60 @@
+steps:
+  # Install Node.js dependencies
+  - name: 'node:18'
+    entrypoint: 'npm'
+    args: ['install', '--legacy-peer-deps']
+    dir: '.'
+
+  # Create Android assets directory
+  - name: 'node:18'
+    entrypoint: 'mkdir'
+    args: ['-p', 'android/app/src/main/assets']
+    dir: '.'
+
+  # Create JavaScript bundle
+  - name: 'node:18'
+    entrypoint: 'npx'
+    args:
+      - 'react-native'
+      - 'bundle'
+      - '--platform'
+      - 'android'
+      - '--dev'
+      - 'false'
+      - '--entry-file'
+      - 'index.js'
+      - '--bundle-output'
+      - 'android/app/src/main/assets/index.android.bundle'
+      - '--assets-dest'
+      - 'android/app/src/main/res'
+    dir: '.'
+
+  # Build Android APK using a container with Android SDK
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'run'
+      - '--rm'
+      - '-v'
+      - '/workspace:/workspace'
+      - '-w'
+      - '/workspace/android'
+      - 'circleci/android:api-30'
+      - 'bash'
+      - '-c'
+      - |
+        # Accept Android SDK licenses
+        yes | sdkmanager --licenses || true
+
+        # Make gradlew executable
+        chmod +x gradlew
+
+        # Build the release APK
+        ./gradlew assembleRelease --no-daemon --stacktrace
+
+# Store the APK as build artifact
+artifacts:
+  objects:
+    location: 'gs://memory-lane-app-469523-builds-1758253577'
+    paths: ['android/app/build/outputs/apk/release/*.apk']
+
+timeout: 1800s
