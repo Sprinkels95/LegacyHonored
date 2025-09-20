@@ -20,7 +20,7 @@ steps:
         echo "Building APK..."
         cd android
         chmod +x gradlew
-        ./gradlew assembleRelease --no-daemon --stacktrace
+        bash gradlew assembleRelease --no-daemon --stacktrace
 
         echo "Build completed! APK files:"
         find . -name "*.apk" -type f
