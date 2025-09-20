@@ -1,6 +1,6 @@
 # Building Legacy Honored APK with Google Cloud
 
-## Quick Setup (5 minutes to Wade's APK!)
+## Quick Setup (5 minutes to build APK!)
 
 ### Option 1: Google Cloud Shell (Easiest)
 
@@ -74,20 +74,20 @@ gcloud builds submit --config cloudbuild.yaml .
 - **File**: `app-release.apk`
 - **Size**: ~20-30MB
 - **Package**: `com.legacyhonored.app`
-- **Ready for**: Wade's Android phone!
+- **Ready for**: Android phone installation!
 
-## Install on Wade's Phone
+## Install on Target Phone
 
 1. **Enable Unknown Sources**
    - Settings → Security → Install Unknown Apps → Allow from Files
 
 2. **Transfer APK**
-   - Email, USB, or Google Drive to Wade's phone
+   - Email, USB, or Google Drive to target phone
 
 3. **Install**
    - Tap the APK file → Install
 
-4. **Wade's First Experience**
+4. **User's First Experience**
    - Opens "Legacy Honored"
    - Chooses "Dr. Evil (The Arch-Villain)"
    - Hears: "Attention! You have built a legacy of courage and strength..."

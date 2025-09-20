@@ -49,7 +49,7 @@ Choose from 9 unique personality companions to make medication reminders more en
 
 ```bash
 # Clone the repository
-git clone https://github.com/Sprinkels95/LegacyHonored.git
+git clone https://github.com/[username]/LegacyHonored.git
 cd LegacyHonored
 
 # Install dependencies
@@ -182,8 +182,8 @@ MIT License - See LICENSE file for details
 
 ## 👥 Credits
 
-- **Developer**: Elsbeth Seymour
-- **Target User Inspiration**: Wade (Parkinson's patient)
+- **Developer**: [Developer Name]
+- **Target User Inspiration**: Individual with Parkinson's disease
 - **AI Assistant**: Claude (Anthropic)
 
 ## 🆘 Support

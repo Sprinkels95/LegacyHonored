@@ -5,7 +5,7 @@
 
 ### 1. Project Setup & Version Control
 - **Git Repository**: Successfully created and pushed to GitHub
-  - Repository: https://github.com/Sprinkels95/LegacyHonored
+  - Repository: https://github.com/[username]/LegacyHonored
   - All source code committed and backed up
   - Comprehensive README.md documentation added
 
