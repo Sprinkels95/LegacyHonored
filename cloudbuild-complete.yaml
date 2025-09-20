@@ -1,0 +1,60 @@
+steps:
+  # Install dependencies and create bundle
+  - name: 'node:20'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        npm install --legacy-peer-deps --force
+        mkdir -p android/app/src/main/assets
+        npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+
+  # Build APK with proper license handling
+  - name: 'openjdk:11-jdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        set -e
+        echo "Installing dependencies..."
+        apt-get update && apt-get install -y wget unzip
+
+        echo "Setting up Android SDK..."
+        cd /tmp
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip -q commandlinetools-linux-9477386_latest.zip
+        mkdir -p /opt/android-sdk/cmdline-tools
+        mv cmdline-tools /opt/android-sdk/cmdline-tools/latest
+
+        export ANDROID_HOME=/opt/android-sdk
+        export ANDROID_SDK_ROOT=/opt/android-sdk
+
+        echo "Accepting licenses..."
+        yes | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses --sdk_root=/opt/android-sdk
+
+        echo "Installing SDK components..."
+        /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" --sdk_root=/opt/android-sdk
+
+        echo "Building APK..."
+        cd /workspace/android
+        ls -la gradlew
+
+        # Download gradle wrapper if needed
+        if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
+          echo "Downloading gradle wrapper..."
+          mkdir -p gradle/wrapper
+          wget -O gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.0.1/gradle/wrapper/gradle-wrapper.jar
+        fi
+
+        # Run gradle build
+        java -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleRelease --no-daemon --stacktrace
+
+        echo "Build completed! Finding APK files:"
+        find . -name "*.apk" -type f
+
+artifacts:
+  objects:
+    location: 'gs://memory-lane-app-469523-builds-1758253577'
+    paths: ['android/app/build/outputs/apk/release/*.apk']
+
+timeout: 2400s
