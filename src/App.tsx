@@ -28,9 +28,15 @@ const SettingsScreen = React.lazy(() => import('./screens/SettingsScreen'));
 import LoadingScreen from './components/LoadingScreen';
 import ScreenLoader from './components/ScreenLoader';
 
+// Contexts
+import { AccessibilityProvider } from './contexts/AccessibilityContext';
+
 // Services
 import PersonaService from './services/PersonaService';
 import VoiceRecognitionService from './services/VoiceRecognitionService';
+import HapticService from './services/HapticService';
+import SecurityService from './services/SecurityService';
+import SecureStorageService from './services/SecureStorageService';
 
 const Tab = createBottomTabNavigator();
 
@@ -55,10 +61,15 @@ const App = (): JSX.Element => {
         console.log('Permissions granted:', granted);
       }
 
-      // Initialize services in parallel for faster startup
+      // Initialize security services first
+      await SecurityService.initialize();
+      await SecureStorageService.initialize();
+
+      // Initialize other services in parallel for faster startup
       await Promise.all([
         PersonaService.initialize(),
-        VoiceRecognitionService.initialize()
+        VoiceRecognitionService.initialize(),
+        HapticService.initialize()
       ]);
 
       // Small delay to show loading screen (prevents jarring flash)
@@ -83,12 +94,13 @@ const App = (): JSX.Element => {
   }
 
   return (
-    <NavigationContainer>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor="#FFFFFF"
-      />
-      <Tab.Navigator
+    <AccessibilityProvider>
+      <NavigationContainer>
+        <StatusBar
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+          backgroundColor="#FFFFFF"
+        />
+        <Tab.Navigator
         screenOptions={{
           tabBarActiveTintColor: '#007AFF',
           tabBarInactiveTintColor: '#8E8E93',
@@ -151,8 +163,9 @@ const App = (): JSX.Element => {
             </Suspense>
           )}
         </Tab.Screen>
-      </Tab.Navigator>
-    </NavigationContainer>
+        </Tab.Navigator>
+      </NavigationContainer>
+    </AccessibilityProvider>
   );
 };
 

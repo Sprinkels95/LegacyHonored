@@ -1,9 +1,9 @@
 /**
- * Legacy Honored Settings Screen
- * Simple settings for Wade
+ * Settings Screen with Accessibility Controls
+ * Manage app preferences and accessibility features
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,18 +11,55 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  Switch,
   Alert,
+  PixelRatio,
 } from 'react-native';
 
+import { useAccessibility } from '../contexts/AccessibilityContext';
+import HapticService from '../services/HapticService';
+import SecurityService from '../services/SecurityService';
+import SecureStorageService from '../services/SecureStorageService';
 import PersonaService, { PersonaVoice } from '../services/PersonaService';
 
-const SettingsScreen = (): JSX.Element => {
+const getFontSize = (baseSize: number): number => {
+  const fontScale = PixelRatio.getFontScale();
+  return baseSize * fontScale;
+};
+
+const SettingsScreen: React.FC = () => {
+  const { settings, updateSetting, getContrastColors, isHighContrast } = useAccessibility();
+  const colors = getContrastColors();
   const [currentPersona, setCurrentPersona] = useState<PersonaVoice | null>(null);
+  const [securityConfig, setSecurityConfig] = useState(SecurityService.getSecurityConfig());
 
   useEffect(() => {
     const persona = PersonaService.getCurrentPersona();
     setCurrentPersona(persona);
+    loadSettings();
   }, []);
+
+  const loadSettings = async () => {
+    try {
+      const config = SecurityService.getSecurityConfig();
+      setSecurityConfig(config);
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+    }
+  };
+
+  const handleAccessibilityToggle = async (key: keyof typeof settings, value: boolean) => {
+    try {
+      HapticService.buttonPress();
+      await updateSetting(key, value);
+      if (key === 'hapticFeedbackEnabled') {
+        HapticService.setEnabled(value);
+        if (value) HapticService.success();
+      }
+    } catch (error) {
+      console.error('Failed to update setting:', error);
+    }
+  };
 
   const handleChangePersona = () => {
     const personas = PersonaService.getAllPersonas();
