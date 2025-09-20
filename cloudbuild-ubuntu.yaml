@@ -1,0 +1,61 @@
+steps:
+  # Install dependencies and create bundle
+  - name: 'node:20'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        set -e
+        npm install --legacy-peer-deps --force
+        mkdir -p android/app/src/main/assets
+        npx react-native bundle \
+          --platform android \
+          --dev false \
+          --entry-file index.js \
+          --bundle-output android/app/src/main/assets/index.android.bundle \
+          --assets-dest android/app/src/main/res
+
+  # Build APK using official Android image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'run'
+      - '--rm'
+      - '-v'
+      - '/workspace:/workspace'
+      - '-w'
+      - '/workspace'
+      - 'openjdk:11-jdk'
+      - 'bash'
+      - '-c'
+      - |
+        set -e
+        echo "Installing Android SDK..."
+        apt-get update && apt-get install -y wget unzip
+
+        # Download and setup Android SDK
+        cd /opt
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip -q commandlinetools-linux-9477386_latest.zip
+        mkdir -p android-sdk/cmdline-tools
+        mv cmdline-tools android-sdk/cmdline-tools/latest
+
+        export ANDROID_HOME=/opt/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+
+        # Accept licenses and install required components
+        yes | sdkmanager --licenses
+        sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+
+        # Build the APK
+        cd /workspace/android
+        bash gradlew assembleRelease --no-daemon --stacktrace
+
+        echo "APK built successfully!"
+        find . -name "*.apk" -type f
+
+artifacts:
+  objects:
+    location: 'gs://memory-lane-app-469523-builds-1758253577'
+    paths: ['android/app/build/outputs/apk/release/*.apk']
+
+timeout: 2400s
