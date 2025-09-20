@@ -13,10 +13,17 @@ import {
   SafeAreaView,
   Alert,
   RefreshControl,
+  PixelRatio,
 } from 'react-native';
 
 import PersonaService, { PersonaVoice } from '../services/PersonaService';
 import VoiceRecognitionService from '../services/VoiceRecognitionService';
+
+// Helper function for accessible font scaling
+const getFontSize = (baseSize: number): number => {
+  const fontScale = PixelRatio.getFontScale();
+  return baseSize * fontScale;
+};
 
 interface Medication {
   id: string;
@@ -106,13 +113,13 @@ const HomeScreen = (): JSX.Element => {
       // Start voice recognition
       await VoiceRecognitionService.startListening();
 
-      // Auto-stop after 10 seconds
+      // Auto-stop after 20 seconds (extended for Parkinson's users)
       setTimeout(async () => {
         if (VoiceRecognitionService.isCurrentlyListening()) {
           await VoiceRecognitionService.stopListening();
           setIsListening(false);
         }
-      }, 10000);
+      }, 20000);
 
     } catch (error) {
       console.error('Voice command failed:', error);
@@ -252,13 +259,31 @@ const HomeScreen = (): JSX.Element => {
           style={[styles.voiceButton, isListening && styles.voiceButtonActive]}
           onPress={handleVoiceCommand}
           activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Voice command for medication reminders"
+          accessibilityHint="Double tap to start listening. Say 'I took my medicine' or 'Help me' for assistance"
+          accessibilityState={{
+            busy: isListening,
+            disabled: false
+          }}
+          accessible={true}
         >
-          <Text style={styles.voiceButtonIcon}>🎤</Text>
-          <Text style={styles.voiceButtonText}>
+          <Text
+            style={styles.voiceButtonIcon}
+            importantForAccessibility="no-hide-descendants"
+            accessibilityLabel="microphone"
+          >🎤</Text>
+          <Text
+            style={styles.voiceButtonText}
+            importantForAccessibility="no-hide-descendants"
+          >
             {isListening ? 'Listening...' : 'Talk to Me'}
           </Text>
           {currentPersona && (
-            <Text style={styles.voiceButtonSubtext}>
+            <Text
+              style={styles.voiceButtonSubtext}
+              importantForAccessibility="no-hide-descendants"
+            >
               Say "I took it" or "Help"
             </Text>
           )}
@@ -270,14 +295,35 @@ const HomeScreen = (): JSX.Element => {
             style={[styles.actionCard, nextMedication.overdue && styles.overdueCard]}
             onPress={handleMedicationAction}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={`Next medication: ${nextMedication.name}, ${nextMedication.dosage}. Due at ${formatTime(nextMedication.nextDose)}`}
+            accessibilityHint="Double tap to mark as taken or snooze this medication"
+            accessibilityState={{
+              disabled: false,
+              selected: false
+            }}
+            accessible={true}
           >
-            <Text style={styles.actionIcon}>💊</Text>
+            <Text
+              style={styles.actionIcon}
+              importantForAccessibility="no-hide-descendants"
+              accessibilityLabel="medication pill"
+            >💊</Text>
             <View style={styles.actionContent}>
-              <Text style={styles.actionTitle}>Next Medication</Text>
-              <Text style={styles.actionDetails}>
+              <Text
+                style={styles.actionTitle}
+                importantForAccessibility="no-hide-descendants"
+              >Next Medication</Text>
+              <Text
+                style={styles.actionDetails}
+                importantForAccessibility="no-hide-descendants"
+              >
                 {nextMedication.name} • {nextMedication.dosage}
               </Text>
-              <Text style={styles.actionTime}>
+              <Text
+                style={styles.actionTime}
+                importantForAccessibility="no-hide-descendants"
+              >
                 Due at {formatTime(nextMedication.nextDose)}
               </Text>
             </View>
@@ -290,12 +336,33 @@ const HomeScreen = (): JSX.Element => {
             style={styles.actionCard}
             onPress={handlePetCare}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={`Pet care task: ${nextPetTask.task}`}
+            accessibilityHint="Double tap to mark pet care task as completed"
+            accessibilityState={{
+              disabled: false,
+              selected: false
+            }}
+            accessible={true}
           >
-            <Text style={styles.actionIcon}>🐕</Text>
+            <Text
+              style={styles.actionIcon}
+              importantForAccessibility="no-hide-descendants"
+              accessibilityLabel="pet dog"
+            >🐕</Text>
             <View style={styles.actionContent}>
-              <Text style={styles.actionTitle}>Pet Care</Text>
-              <Text style={styles.actionDetails}>{nextPetTask.task}</Text>
-              <Text style={styles.actionTime}>
+              <Text
+                style={styles.actionTitle}
+                importantForAccessibility="no-hide-descendants"
+              >Pet Care</Text>
+              <Text
+                style={styles.actionDetails}
+                importantForAccessibility="no-hide-descendants"
+              >{nextPetTask.task}</Text>
+              <Text
+                style={styles.actionTime}
+                importantForAccessibility="no-hide-descendants"
+              >
                 Due at {formatTime(nextPetTask.due)}
               </Text>
             </View>
@@ -307,9 +374,24 @@ const HomeScreen = (): JSX.Element => {
           style={styles.emergencyButton}
           onPress={handleEmergencyPress}
           activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Emergency help button"
+          accessibilityHint="Double tap to contact emergency services or family for immediate help"
+          accessibilityState={{
+            disabled: false,
+            selected: false
+          }}
+          accessible={true}
         >
-          <Text style={styles.emergencyIcon}>🚨</Text>
-          <Text style={styles.emergencyText}>Emergency Help</Text>
+          <Text
+            style={styles.emergencyIcon}
+            importantForAccessibility="no-hide-descendants"
+            accessibilityLabel="emergency alert"
+          >🚨</Text>
+          <Text
+            style={styles.emergencyText}
+            importantForAccessibility="no-hide-descendants"
+          >Emergency Help</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -333,7 +415,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   personaText: {
-    fontSize: 18,
+    fontSize: getFontSize(18),
     fontWeight: '600',
     color: '#333333',
     textAlign: 'center',
@@ -359,18 +441,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF3B30',
   },
   voiceButtonIcon: {
-    fontSize: 48,
+    fontSize: getFontSize(48),
     marginBottom: 12,
   },
   voiceButtonText: {
-    fontSize: 28,
+    fontSize: getFontSize(28),
     fontWeight: '700',
     color: '#FFFFFF',
     textAlign: 'center',
     marginBottom: 8,
   },
   voiceButtonSubtext: {
-    fontSize: 16,
+    fontSize: getFontSize(16),
     color: '#FFFFFF',
     opacity: 0.8,
     textAlign: 'center',
@@ -399,25 +481,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF5F5',
   },
   actionIcon: {
-    fontSize: 32,
+    fontSize: getFontSize(32),
     marginRight: 16,
   },
   actionContent: {
     flex: 1,
   },
   actionTitle: {
-    fontSize: 20,
+    fontSize: getFontSize(20),
     fontWeight: '600',
     color: '#333333',
     marginBottom: 4,
   },
   actionDetails: {
-    fontSize: 18,
+    fontSize: getFontSize(18),
     color: '#666666',
     marginBottom: 4,
   },
   actionTime: {
-    fontSize: 16,
+    fontSize: getFontSize(16),
     color: '#999999',
   },
   emergencyButton: {

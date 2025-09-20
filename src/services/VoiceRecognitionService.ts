@@ -109,11 +109,12 @@ class VoiceRecognitionServiceClass {
 
       this.isListening = true;
 
-      // Configure for Parkinson's users - longer timeout, lower confidence
+      // Configure for Parkinson's users - extended timeouts for slower speech patterns
       await Voice.start('en-US', {
-        EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS: 8000, // 8 seconds
-        EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS: 8000,
-        EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS: 2000,
+        EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS: 15000, // 15 seconds for Parkinson's pauses
+        EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS: 8000, // 8 seconds for possible completion
+        EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS: 3000, // 3 seconds minimum speech
+        SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS: 12000, // 12 seconds before giving up
       });
 
       console.log('Voice recognition started');
