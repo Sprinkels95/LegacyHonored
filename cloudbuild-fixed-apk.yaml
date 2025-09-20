@@ -1,0 +1,64 @@
+steps:
+  # Install Node.js dependencies
+  - name: 'node:20'
+    entrypoint: 'npm'
+    args: ['install', '--legacy-peer-deps', '--force']
+    dir: '.'
+
+  # Create React Native bundle
+  - name: 'node:20'
+    entrypoint: 'npx'
+    args:
+      - 'react-native'
+      - 'bundle'
+      - '--platform'
+      - 'android'
+      - '--dev'
+      - 'false'
+      - '--entry-file'
+      - 'index.js'
+      - '--bundle-output'
+      - 'android/app/src/main/assets/index.android.bundle'
+      - '--assets-dest'
+      - 'android/app/src/main/res'
+    dir: '.'
+
+  # Create assets directory if it doesn't exist
+  - name: 'node:20'
+    entrypoint: 'mkdir'
+    args: ['-p', 'android/app/src/main/assets']
+    dir: '.'
+
+  # Build Android APK with proper Java/Android environment
+  - name: 'cimg/android:2023.08'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        set -e
+        echo "Setting up environment..."
+        export ANDROID_HOME=/home/circleci/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools
+
+        echo "Java version:"
+        java -version
+
+        echo "Setting gradlew permissions..."
+        cd android
+        chmod +x gradlew
+        ls -la gradlew
+
+        echo "Running Gradle build..."
+        ./gradlew assembleRelease --no-daemon --stacktrace
+
+        echo "Build completed! Listing APK files:"
+        find . -name "*.apk" -type f
+    dir: '.'
+
+# Store the APK as build artifact
+artifacts:
+  objects:
+    location: 'gs://memory-lane-app-469523-builds-1758253577'
+    paths: ['android/app/build/outputs/apk/release/*.apk']
+
+timeout: 1800s
