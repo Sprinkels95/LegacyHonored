@@ -19,8 +19,17 @@ steps:
 
         echo "Building APK..."
         cd android
+
+        echo "Checking gradle wrapper..."
+        ls -la gradlew
+        ls -la gradle/wrapper/
+
+        echo "Testing gradle wrapper..."
         chmod +x gradlew
-        bash gradlew assembleRelease --no-daemon --stacktrace
+        ./gradlew --version
+
+        echo "Running assembleRelease..."
+        ./gradlew assembleRelease --no-daemon --stacktrace
 
         echo "Build completed! APK files:"
         find . -name "*.apk" -type f
