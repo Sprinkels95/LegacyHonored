@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Simple gradle wrapper script
+GRADLE_HOME="$(dirname "$0")/gradle/wrapper"
+GRADLE_JAR="$GRADLE_HOME/gradle-wrapper.jar"
+
+if [ ! -f "$GRADLE_JAR" ]; then
+    echo "Error: gradle-wrapper.jar not found at $GRADLE_JAR"
+    exit 1
+fi
+
+# Execute gradle with the wrapper
+exec java -classpath "$GRADLE_JAR" org.gradle.wrapper.GradleWrapperMain "$@"

@@ -26,10 +26,13 @@ steps:
 
         echo "Testing gradle wrapper..."
         chmod +x gradlew
-        ./gradlew --version
+        chmod +x gradlew-simple
 
-        echo "Running assembleRelease..."
-        ./gradlew assembleRelease --no-daemon --stacktrace
+        echo "Trying simple wrapper..."
+        ./gradlew-simple --version
+
+        echo "Running assembleRelease with simple wrapper..."
+        ./gradlew-simple assembleRelease --no-daemon --stacktrace
 
         echo "Build completed! APK files:"
         find . -name "*.apk" -type f
