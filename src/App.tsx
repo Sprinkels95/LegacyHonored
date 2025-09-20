@@ -3,7 +3,7 @@
  * Technology that honors your life's work
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
@@ -16,14 +16,21 @@ import {
   PermissionsAndroid,
 } from 'react-native';
 
-// Screens
+// Screens - HomeScreen loads immediately, others lazy load
 import HomeScreen from './screens/HomeScreen';
-import MedicationScreen from './screens/MedicationScreen';
-import LegalDocumentsScreen from './screens/LegalDocumentsScreen';
-import SettingsScreen from './screens/SettingsScreen';
+
+// Lazy load non-critical screens for faster startup
+const MedicationScreen = React.lazy(() => import('./screens/MedicationScreen'));
+const LegalDocumentsScreen = React.lazy(() => import('./screens/LegalDocumentsScreen'));
+const SettingsScreen = React.lazy(() => import('./screens/SettingsScreen'));
+
+// Components
+import LoadingScreen from './components/LoadingScreen';
+import ScreenLoader from './components/ScreenLoader';
 
 // Services
 import PersonaService from './services/PersonaService';
+import VoiceRecognitionService from './services/VoiceRecognitionService';
 
 const Tab = createBottomTabNavigator();
 
@@ -45,12 +52,17 @@ const App = (): JSX.Element => {
         ];
 
         const granted = await PermissionsAndroid.requestMultiple(permissions);
-
         console.log('Permissions granted:', granted);
       }
 
-      // Initialize services
-      await PersonaService.initialize();
+      // Initialize services in parallel for faster startup
+      await Promise.all([
+        PersonaService.initialize(),
+        VoiceRecognitionService.initialize()
+      ]);
+
+      // Small delay to show loading screen (prevents jarring flash)
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       setIsInitialized(true);
     } catch (error) {
@@ -60,12 +72,14 @@ const App = (): JSX.Element => {
         'There was a problem starting Legacy Honored. Please try again.',
         [{ text: 'OK' }]
       );
+      // Still allow app to continue with limited functionality
+      setIsInitialized(true);
     }
   };
 
   if (!isInitialized) {
     // Show loading screen while initializing
-    return <SafeAreaView style={styles.loadingContainer} />;
+    return <LoadingScreen />;
   }
 
   return (
@@ -95,29 +109,48 @@ const App = (): JSX.Element => {
           component={HomeScreen}
           options={{
             tabBarLabel: 'Home',
+            tabBarAccessibilityLabel: 'Home screen - voice commands and medication reminders',
           }}
         />
         <Tab.Screen
           name="Medications"
-          component={MedicationScreen}
           options={{
             tabBarLabel: 'Medications',
+            tabBarAccessibilityLabel: 'Medications screen - manage your medicine schedule',
           }}
-        />
+        >
+          {() => (
+            <Suspense fallback={<ScreenLoader screenName="Medications" />}>
+              <MedicationScreen />
+            </Suspense>
+          )}
+        </Tab.Screen>
         <Tab.Screen
           name="Documents"
-          component={LegalDocumentsScreen}
           options={{
             tabBarLabel: 'Documents',
+            tabBarAccessibilityLabel: 'Legal documents screen - important papers and contacts',
           }}
-        />
+        >
+          {() => (
+            <Suspense fallback={<ScreenLoader screenName="Documents" />}>
+              <LegalDocumentsScreen />
+            </Suspense>
+          )}
+        </Tab.Screen>
         <Tab.Screen
           name="Settings"
-          component={SettingsScreen}
           options={{
             tabBarLabel: 'Settings',
+            tabBarAccessibilityLabel: 'Settings screen - configure voice assistant and preferences',
           }}
-        />
+        >
+          {() => (
+            <Suspense fallback={<ScreenLoader screenName="Settings" />}>
+              <SettingsScreen />
+            </Suspense>
+          )}
+        </Tab.Screen>
       </Tab.Navigator>
     </NavigationContainer>
   );

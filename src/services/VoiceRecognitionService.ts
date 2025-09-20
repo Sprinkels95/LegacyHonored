@@ -309,6 +309,28 @@ class VoiceRecognitionServiceClass {
   async processTextCommand(text: string): Promise<string> {
     return await this.processCommand(text);
   }
+
+  // Memory cleanup for low-memory devices
+  async cleanup(): Promise<void> {
+    try {
+      // Stop listening if active
+      if (this.isListening) {
+        await this.stopListening();
+      }
+
+      // Clean up Voice listeners
+      Voice.removeAllListeners();
+
+      console.log('VoiceRecognitionService cleanup completed');
+    } catch (error) {
+      console.error('VoiceRecognitionService cleanup failed:', error);
+    }
+  }
+
+  // Check if currently listening (for external cleanup)
+  isCurrentlyListening(): boolean {
+    return this.isListening;
+  }
 }
 
 const VoiceRecognitionService = new VoiceRecognitionServiceClass();

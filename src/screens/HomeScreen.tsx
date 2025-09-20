@@ -18,6 +18,7 @@ import {
 
 import PersonaService, { PersonaVoice } from '../services/PersonaService';
 import VoiceRecognitionService from '../services/VoiceRecognitionService';
+import { MicrophoneIcon, PillIcon, DogIcon, EmergencyIcon } from '../components/AccessibleIcons';
 
 // Helper function for accessible font scaling
 const getFontSize = (baseSize: number): number => {
@@ -50,6 +51,13 @@ const HomeScreen = (): JSX.Element => {
 
   useEffect(() => {
     initializeScreen();
+
+    // Cleanup function for memory management
+    return () => {
+      // Clean up services when component unmounts
+      VoiceRecognitionService.cleanup();
+      PersonaService.clearCache();
+    };
   }, []);
 
   const initializeScreen = async () => {
@@ -268,11 +276,11 @@ const HomeScreen = (): JSX.Element => {
           }}
           accessible={true}
         >
-          <Text
-            style={styles.voiceButtonIcon}
-            importantForAccessibility="no-hide-descendants"
+          <MicrophoneIcon
+            size={48}
+            color="#FFFFFF"
             accessibilityLabel="microphone"
-          >🎤</Text>
+          />
           <Text
             style={styles.voiceButtonText}
             importantForAccessibility="no-hide-descendants"
@@ -304,11 +312,10 @@ const HomeScreen = (): JSX.Element => {
             }}
             accessible={true}
           >
-            <Text
-              style={styles.actionIcon}
-              importantForAccessibility="no-hide-descendants"
+            <PillIcon
+              size={32}
               accessibilityLabel="medication pill"
-            >💊</Text>
+            />
             <View style={styles.actionContent}>
               <Text
                 style={styles.actionTitle}
@@ -345,11 +352,10 @@ const HomeScreen = (): JSX.Element => {
             }}
             accessible={true}
           >
-            <Text
-              style={styles.actionIcon}
-              importantForAccessibility="no-hide-descendants"
+            <DogIcon
+              size={32}
               accessibilityLabel="pet dog"
-            >🐕</Text>
+            />
             <View style={styles.actionContent}>
               <Text
                 style={styles.actionTitle}
@@ -383,11 +389,10 @@ const HomeScreen = (): JSX.Element => {
           }}
           accessible={true}
         >
-          <Text
-            style={styles.emergencyIcon}
-            importantForAccessibility="no-hide-descendants"
+          <EmergencyIcon
+            size={32}
             accessibilityLabel="emergency alert"
-          >🚨</Text>
+          />
           <Text
             style={styles.emergencyText}
             importantForAccessibility="no-hide-descendants"

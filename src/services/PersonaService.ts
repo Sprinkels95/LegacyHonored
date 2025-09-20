@@ -322,6 +322,27 @@ class PersonaServiceClass {
         return "Getting help for you immediately.";
     }
   }
+
+  // Memory cleanup for low-memory devices
+  async cleanup(): Promise<void> {
+    try {
+      // Stop any ongoing TTS
+      await Tts.stop();
+
+      // Clear cached voice data
+      this.currentPersona = null;
+
+      console.log('PersonaService cleanup completed');
+    } catch (error) {
+      console.error('PersonaService cleanup failed:', error);
+    }
+  }
+
+  // Clear TTS cache to free memory
+  clearCache(): void {
+    // Reset to minimal state
+    this.currentPersona = null;
+  }
 }
 
 const PersonaService = new PersonaServiceClass();
