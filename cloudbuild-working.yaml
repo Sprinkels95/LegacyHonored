@@ -32,8 +32,13 @@ steps:
         export ANDROID_HOME=/home/circleci/android-sdk
         export ANDROID_SDK_ROOT=/home/circleci/android-sdk
         cd android
-        chmod +x gradlew
-        ./gradlew assembleRelease --no-daemon --stacktrace
+
+        # Copy gradlew to avoid permission issues
+        cp gradlew gradlew_copy
+        chmod +x gradlew_copy
+
+        # Run gradle with the copy
+        bash gradlew_copy assembleRelease --no-daemon --stacktrace
         find . -name "*.apk" -type f
 
 artifacts:
