@@ -1,0 +1,24 @@
+# Android build container with Node.js
+FROM node:20
+
+# Install OpenJDK and Android dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    unzip \
+    openjdk-11-jdk \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up Android SDK
+ENV ANDROID_HOME=/opt/android-sdk
+ENV ANDROID_SDK_ROOT=/opt/android-sdk
+ENV PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+
+RUN cd /tmp && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip && \
+    unzip -q commandlinetools-linux-9477386_latest.zip && \
+    mkdir -p $ANDROID_HOME/cmdline-tools && \
+    mv cmdline-tools $ANDROID_HOME/cmdline-tools/latest && \
+    yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses && \
+    $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+
+WORKDIR /workspace

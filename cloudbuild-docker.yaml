@@ -1,0 +1,33 @@
+steps:
+  # Build custom Android container with Node.js
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-f', 'Dockerfile.android', '-t', 'android-node-builder', '.']
+
+  # Install dependencies and build APK in one step
+  - name: 'android-node-builder'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        set -e
+        echo "Installing npm dependencies..."
+        npm install --legacy-peer-deps --force
+
+        echo "Creating bundle..."
+        mkdir -p android/app/src/main/assets
+        npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+
+        echo "Building APK..."
+        cd android
+        chmod +x gradlew
+        ./gradlew assembleRelease --no-daemon --stacktrace
+
+        echo "Build completed! APK files:"
+        find . -name "*.apk" -type f
+
+artifacts:
+  objects:
+    location: 'gs://memory-lane-app-469523-builds-1758253577'
+    paths: ['android/app/build/outputs/apk/release/*.apk']
+
+timeout: 3600s
