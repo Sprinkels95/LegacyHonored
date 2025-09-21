@@ -14,9 +14,6 @@ import {
   Alert,
   RefreshControl,
   PixelRatio,
-  TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
 } from 'react-native';
 
 import { PillIcon } from '../components/AccessibleIcons';

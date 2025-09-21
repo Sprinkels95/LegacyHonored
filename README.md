@@ -182,7 +182,7 @@ MIT License - See LICENSE file for details
 
 ## 👥 Credits
 
-- **Developer**: [Developer Name]
+- **Developer**: Els, Sprinkels95
 - **Target User Inspiration**: Individual with Parkinson's disease
 - **AI Assistant**: Claude (Anthropic)
 

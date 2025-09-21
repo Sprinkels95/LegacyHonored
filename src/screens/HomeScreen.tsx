@@ -556,7 +556,7 @@ const HomeScreen: React.FC = React.memo(() => {
       </ScrollView>
     </SafeAreaView>
   );
-};
+});
 
 const styles = StyleSheet.create({
   actionContent: {
