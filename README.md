@@ -1,16 +1,17 @@
+
 # LegacyHonored
 
 **Technology that honors your life's work**
 
 A production-ready React Native mobile application designed specifically for seniors with medication management needs, featuring AI personality companions, enterprise-grade security, and accessibility-focused design for users with Parkinson's disease and other conditions.
 
-## 🏆 **Production Status: 95% Complete - Ready for Play Store Testing**
+## 🏆 **Production Status: 95% Complete - Ready for Automated Testing**
 
 - ✅ **Enterprise Security**: Biometric auth, encrypted storage, HIPAA-ready
 - ✅ **Medical Compliance**: Real medication scheduling with adherence tracking
 - ✅ **Accessibility**: WCAG 2.1 AA compliant for Parkinson's users
 - ✅ **Performance**: Optimized for seniors' devices with 1.1MB bundle
-- ✅ **Testing Ready**: APK build pipeline configured
+- ✅ **CI/CD Pipeline**: Fully automated build & distribution with Google Cloud Build and Firebase.
 
 ## 🎭 Features
 
@@ -57,53 +58,47 @@ Choose from 9 unique personality companions to make medication reminders more en
 - **React Native Vector Icons** - Accessible iconography
 
 ### Infrastructure
-- **Google Cloud Build** - Automated APK generation
-- **Google IDX** - Development environment
-- **Firebase** - Backend services ready
+- **Google Cloud Build** - Fully automated build, test, and distribution pipeline.
+- **Firebase App Distribution** - Automated distribution of test builds to designated testers.
+- **Docker** - Containerized build environment for consistency and reliability.
+- **Google IDX** - Development environment.
 
-## 📱 App Availability
+## 🚀 Deployment & Next Steps
 
-**Current Status:** LegacyHonored is in **Internal Testing** phase and not yet available for public download.
+### Current Status: Ready for Automated Distribution via Firebase
 
-### For Healthcare Professionals & Caregivers
-If you're interested in this app for your patients or loved ones with Parkinson's disease, please:
-- Contact the development team for testing access
-- Review the accessibility and medical compliance features
-- Provide feedback during the controlled testing phase
+The app and its infrastructure are configured for a fully automated build and distribution pipeline using Google Cloud Build and Firebase App Distribution. This provides a robust, reliable, and repeatable process for creating and distributing test builds.
 
-### For Developers & Contributors
-This repository serves as a reference implementation for:
-- Accessibility-first mobile app design
-- WCAG 2.1 AA compliance in React Native
-- Enterprise security for medical applications
-- AI personality integration for healthcare
+### The Build Process
 
-**Note:** Direct installation is not recommended until official release through Google Play Store.
+The core of our build process is the `cloudbuild.yaml` file, which orchestrates a multi-step build on Google Cloud:
 
-## 🎯 Target Users
+1.  **Custom Build Environment**: The build starts by using `Dockerfile.android` to create a custom Docker image. This image contains all the necessary tools and dependencies for a React Native Android build, including Node.js, the Android SDK, and Gradle. This eliminates environment inconsistencies.
+2.  **Build Execution**: The build then runs inside this custom container. It installs npm dependencies and executes the standard Android Gradle build (`./gradlew assembleRelease`) to create the APK.
+3.  **Automated Distribution**: Once the APK is successfully built, it is automatically uploaded to Firebase App Distribution and sent to the "testers" group.
 
-### Primary: Seniors with Parkinson's Disease
-- Large, easy-to-tap buttons
-- Voice control for tremor accommodation
-- Slower speech rate for better comprehension
-- Dramatic personas (like Dr. Evil) for entertainment and engagement
+#### **How to Trigger a New Build and Distribution:**
 
-### Secondary: General Senior Population
-- Simplified interface design
-- Medication reminder system
-- Emergency contact integration
-- Pet care scheduling
+1.  **Ensure you are authenticated with Google Cloud:**
+    ```bash
+    gcloud auth login
+    gcloud config set project memory-lane-app-469523
+    ```
 
-## 🗣️ Persona Examples
+2.  **Submit the build to Google Cloud Build:**
+    ```bash
+    gcloud builds submit --config cloudbuild.yaml .
+    ```
 
-### Dr. Evil Medication Reminder
-> "Attention! The time has come for your Levodopa, 100mg. My evil plan requires you to take it with food for maximum effectiveness! Muahahaha!"
+This single command will build the app, create the APK, and distribute it to all registered testers in Firebase.
 
-### Ward Cleaver Encouragement
-> "Son, it's time for your medication. You're showing real responsibility by staying on top of your health."
+#### **Testing Phase (Est. 1-2 weeks):**
+- Testers will receive an email notification from Firebase App Distribution to download the new build.
+- Install on Wade's Android device.
+- Test Dr. Evil personality with real Parkinson's speech patterns.
+- Collect feedback on medication adherence features.
+- Verify accessibility features work in real conditions.
 
-### Lucy Ricardo Energy
-> "¡Dios mío! Time for your medicine! Let's take it and get on with our fabulous day!"
 
 ## 🏗️ Project Structure
 
@@ -120,56 +115,21 @@ LegacyHonored/
 │       ├── PersonaService.ts   # AI persona management
 │       └── VoiceRecognitionService.ts
 ├── android/                    # Android build configuration
-├── cloudbuild.yaml            # Google Cloud Build config
-├── Dockerfile                 # Container build setup
-└── GOOGLE_CLOUD_BUILD.md      # Detailed build instructions
+├── cloudbuild.yaml             # Google Cloud Build config for CI/CD
+├── Dockerfile.android          # Custom Docker image for Android builds
+└── README.md                   # This file
 ```
 
 ## 🔧 Configuration
 
 ### Android Package
-- **Package ID**: `com.legacyhonored.app`
+- **Package ID**: `com.memorylane.app`
 - **App Name**: "Legacy Honored"
 - **Version**: 1.0.0
 
 ### Permissions Required
 - `RECORD_AUDIO` - Voice recognition
 - `CALL_PHONE` - Emergency calling (planned feature)
-
-## 🚀 Deployment & Next Steps
-
-### Current Status: Ready for Play Store Testing
-
-The app is fully developed with enterprise-grade security and ready for distribution testing.
-
-#### **Immediate Next Steps (Est. 30-45 minutes):**
-1. **Google Cloud Authentication** (5 minutes)
-   ```bash
-   gcloud auth login
-   gcloud config set project memory-lane-app-469523
-   ```
-
-2. **Build APK** (15-20 minutes)
-   ```bash
-   gcloud builds submit --config cloudbuild.yaml .
-   ```
-
-3. **Play Store Internal Testing Setup** (15-20 minutes)
-   - Create app in Google Play Console
-   - Upload APK to Internal Testing track
-   - Add test users (Wade + family)
-
-#### **Testing Phase (Est. 1-2 weeks):**
-- Install on Wade's Android device
-- Test Dr. Evil personality with real Parkinson's speech patterns
-- Collect feedback on medication adherence features
-- Verify accessibility features work in real conditions
-
-### Google Cloud Project
-- **Project ID**: `memory-lane-app-469523`
-- **Build Config**: `cloudbuild.yaml` (production-ready)
-- **Storage**: Google Cloud Storage buckets
-- **Status**: All infrastructure configured and tested
 
 ## 🤝 Contributing
 
@@ -189,7 +149,7 @@ MIT License - See LICENSE file for details
 
 - **Developer**: Sprinkels
 - **Target User Inspiration**: Individual with Parkinson's disease
-- **AI Assistant**: Claude (Anthropic)
+- **AI Assistant**: Claude (Anthropic) & Gemini (Google)
 
 ## 🆘 Support
 
