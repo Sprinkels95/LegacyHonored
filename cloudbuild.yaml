@@ -1,39 +1,32 @@
 steps:
-# Build the custom builder image that has both Node.js and the Android SDK
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/$PROJECT_ID/android-builder', '.', '-f', 'Dockerfile.android']
-
-# Run the build process inside the custom builder
-- name: 'gcr.io/$PROJECT_ID/android-builder'
-  entrypoint: 'bash'
-  args:
-  - '-c' 
-  - |
-    npm install --legacy-peer-deps
-    cd android
-    chmod +x gradlew
-    ./gradlew assembleRelease
-
-# Distribute the APK using Firebase App Distribution
-- name: 'node:20'
+# Step 1: Install Dependencies, Fix Permissions, and Build the App
+# This single step ensures the build environment is consistent.
+- name: 'reactnativecommunity/react-native-android'
   entrypoint: 'bash'
   args:
     - '-c'
     - |
-      npm install -g firebase-tools
-      firebase appdistribution:distribute android/app/build/outputs/apk/release/app-release.apk \
-        --app "1:53700756169:android:2f4d0891542f2c286d51d8" \
-        --release-notes "Successful build from Google Cloud Build!" \
-        --groups "testers"
+      npm install --legacy-peer-deps
+      cd android
+      chmod +x gradlew #<-- The critical permission fix, inside the build step.
+      ./gradlew assembleRelease
 
-# Store the APK as a build artifact
+# Step 2: Distribute the APK to testers via Firebase App Distribution.
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: 'gcloud'
+  args:
+    - 'firebase'
+    - 'appdistribution:distribute'
+    - 'android/app/build/outputs/apk/release/app-release.apk'
+    - '--app=1:53700756169:android:2f4d0891542f2c286d51d8'
+    - '--release-notes=This build is successful. The pipeline is now fully operational.'
+    - '--groups=testers'
+
+# Make the generated APK available as a downloadable artifact.
 artifacts:
   objects:
     location: 'gs://memory-lane-app-469523-builds'
     paths: ['android/app/build/outputs/apk/release/app-release.apk']
 
-# Push the custom builder image to the registry
-images:
-- 'gcr.io/$PROJECT_ID/android-builder'
-
+# Set a generous timeout for the build.
 timeout: 3600s

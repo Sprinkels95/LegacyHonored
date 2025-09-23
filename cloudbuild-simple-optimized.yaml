@@ -1,0 +1,29 @@
+steps:
+# Step 1: Build the Android App using the community-provided image
+- name: 'reactnativecommunity/react-native-android'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      npm install --legacy-peer-deps
+      cd android
+      bash ./gradlew assembleRelease
+
+# Step 2: Distribute the APK using Firebase App Distribution.
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      gcloud firebase appdistribute android/app/build/outputs/apk/release/app-release.apk \
+        --app="1:53700756169:android:2f4d0891542f2c286d51d8" \
+        --release-notes="Successful build using optimized community image!" \
+        --groups="testers"
+
+# Store the final APK as a build artifact for records.
+artifacts:
+  objects:
+    location: 'gs://memory-lane-app-469523-builds'
+    paths: ['android/app/build/outputs/apk/release/app-release.apk']
+
+timeout: 3600s
