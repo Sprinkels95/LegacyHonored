@@ -1,12 +1,11 @@
 steps:
+  # Install Node.js dependencies
   - name: 'node:20'
     entrypoint: 'npm'
-    args: ['install', '--legacy-peer-deps', '--force']
+    args: ['install', '--legacy-peer-deps']
+    dir: '.'
 
-  - name: 'node:20'
-    entrypoint: 'mkdir'
-    args: ['-p', 'android/app/src/main/assets']
-
+  # Create React Native bundle
   - name: 'node:20'
     entrypoint: 'npx'
     args:
@@ -22,25 +21,36 @@ steps:
       - 'android/app/src/main/assets/index.android.bundle'
       - '--assets-dest'
       - 'android/app/src/main/res'
+    dir: '.'
 
-  - name: 'cimg/android:2023.08'
-    entrypoint: 'bash'
+  # Build APK using official Android builder
+  - name: 'gcr.io/cloud-builders/docker'
     args:
+      - 'run'
+      - '--rm'
+      - '-v'
+      - '/workspace:/workspace'
+      - '-w'
+      - '/workspace'
+      - 'cimg/android:2024.01.1'
+      - 'bash'
       - '-c'
       - |
-        set -e
         export ANDROID_HOME=/home/circleci/android-sdk
         export ANDROID_SDK_ROOT=/home/circleci/android-sdk
         cd android
 
-        # Copy gradlew to avoid permission issues
-        cp gradlew gradlew_copy
-        chmod +x gradlew_copy
+        # Fix line endings for Windows-created files
+        sed -i 's/\r$//' gradlew
+        chmod +x gradlew
 
-        # Run gradle with the copy
-        bash gradlew_copy assembleRelease --no-daemon --stacktrace
+        # Build the APK
+        ./gradlew assembleRelease --no-daemon --stacktrace
+
+        # List generated APK files
         find . -name "*.apk" -type f
 
+# Store the APK as build artifact
 artifacts:
   objects:
     location: 'gs://memory-lane-app-469523-builds-1758588886'

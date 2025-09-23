@@ -40,6 +40,14 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            // Production keystore configuration
+            // For security, credentials are loaded from environment variables
+            storeFile file(System.getenv("RELEASE_KEYSTORE_PATH") ?: 'debug.keystore')
+            storePassword System.getenv("RELEASE_STORE_PASSWORD") ?: 'android'
+            keyAlias System.getenv("RELEASE_KEY_ALIAS") ?: 'androiddebugkey'
+            keyPassword System.getenv("RELEASE_KEY_PASSWORD") ?: 'android'
+        }
     }
 
     buildTypes {
@@ -47,7 +55,7 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }

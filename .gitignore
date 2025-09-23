@@ -57,6 +57,23 @@ coverage
 .env.test.local
 .env.production.local
 
+# Google Services (contains API keys)
+google-services.json
+android/app/google-services.json
+ios/GoogleService-Info.plist
+
+# Android Keystores (security critical)
+*.keystore
+*.jks
+*.p12
+*.pfx
+android/app/release.keystore
+android/keystores/
+
+# Additional sensitive files
+credentials.json
+service-account*.json
+
 # Build outputs
 dist/
 build/
