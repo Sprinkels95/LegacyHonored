@@ -13,6 +13,11 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     namespace "com.memorylane.app"
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
     defaultConfig {
         applicationId "com.memorylane.app"
         minSdkVersion rootProject.ext.minSdkVersion
