@@ -1,15 +1,27 @@
 steps:
-# Step 1: Install Dependencies, Fix Permissions, and Build the App
-# This single step ensures the build environment is consistent.
+# Step 1: Install Dependencies, Create Bundle, Fix Permissions, and Build the App
 - name: 'reactnativecommunity/react-native-android'
   entrypoint: 'bash'
   args:
     - '-c'
     - |
+      set -e
+      echo "=== Installing Dependencies ==="
       npm install --legacy-peer-deps
+
+      echo "=== Creating React Native Bundle ==="
+      mkdir -p android/app/src/main/assets
+      npx react-native bundle \
+        --platform android \
+        --dev false \
+        --entry-file index.js \
+        --bundle-output android/app/src/main/assets/index.android.bundle \
+        --assets-dest android/app/src/main/res
+
+      echo "=== Building APK ==="
       cd android
-      chmod +x gradlew #<-- The critical permission fix, inside the build step.
-      ./gradlew assembleRelease
+      chmod +x gradlew
+      bash ./gradlew clean assembleRelease --no-daemon --stacktrace
 
 # Step 2: Distribute the APK to testers via Firebase App Distribution.
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
