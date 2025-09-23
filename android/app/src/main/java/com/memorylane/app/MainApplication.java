@@ -1,4 +1,4 @@
-package com.legacyhonored;
+package com.memorylane.app;
 
 import android.app.Application;
 import com.facebook.react.PackageList;

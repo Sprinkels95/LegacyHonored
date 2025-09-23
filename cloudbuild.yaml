@@ -35,8 +35,7 @@ steps:
       - '-c'
       - |
         cd android
-        sudo chmod +x gradlew
-        sudo ./gradlew assembleRelease --no-daemon
+        java -jar gradle/wrapper/gradle-wrapper.jar assembleRelease --no-daemon
 
 # Store the APK as build artifact
 artifacts:

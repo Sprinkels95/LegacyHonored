@@ -18,7 +18,7 @@ import {
 
 import { PillIcon } from '../components/AccessibleIcons';
 import { useAccessibility } from '../contexts/AccessibilityContext';
-import BiometricAuthGate from '../components/BiometricAuthGate';
+import GoogleAuthGate from '../components/GoogleAuthGate';
 import SecureStorageService from '../services/SecureStorageService';
 import HapticService from '../services/HapticService';
 import PersonaService from '../services/PersonaService';
@@ -116,7 +116,7 @@ const MedicationScreen: React.FC = React.memo(() => {
 
       Alert.alert(
         'Take Medication',
-        `${medication.name} • ${medication.dosage}\n\n${medication.notes || ''}`,
+        `${medication.name} • ${medication.dosage}\\n\\n${medication.notes || ''}`,
         [
           {
             text: 'I Took It',
@@ -263,7 +263,7 @@ const MedicationScreen: React.FC = React.memo(() => {
   }), [colors, isHighContrast]);
 
   return (
-    <BiometricAuthGate reason="Access your medication schedule">
+    <GoogleAuthGate reason="Access your medication schedule">
       <SafeAreaView style={dynamicStyles.container}>
         <ScrollView
           style={dynamicStyles.scrollView}
@@ -316,7 +316,7 @@ const MedicationScreen: React.FC = React.memo(() => {
             ))}
         </ScrollView>
       </SafeAreaView>
-    </BiometricAuthGate>
+    </GoogleAuthGate>
   );
 });
 
