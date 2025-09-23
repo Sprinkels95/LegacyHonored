@@ -14,7 +14,7 @@ android {
 
     namespace "com.legacyhonored"
     defaultConfig {
-        applicationId "com.legacyhonored.app"
+        applicationId "com.legacyhonored"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
