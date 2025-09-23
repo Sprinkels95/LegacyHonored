@@ -33,7 +33,12 @@ steps:
       file gradlew
       head -5 gradlew
 
-      echo "=== Trying Java directly ==="
+      echo "=== Setting JAVA_HOME to Java 17 ==="
+      export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      export PATH=$JAVA_HOME/bin:$PATH
+      java -version
+
+      echo "=== Building with Java 17 ==="
       java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleRelease --no-daemon --stacktrace
 
       echo "=== Verifying APK ==="
