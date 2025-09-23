@@ -28,7 +28,13 @@ steps:
       echo "=== Building Release APK ==="
       cd android
       chmod +x gradlew
-      ./gradlew assembleRelease --no-daemon --stacktrace
+
+      echo "=== Debugging gradlew ==="
+      file gradlew
+      head -5 gradlew
+
+      echo "=== Trying Java directly ==="
+      java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleRelease --no-daemon --stacktrace
 
       echo "=== Verifying APK ==="
       find . -name "*.apk" -type f -exec ls -la {} \;
