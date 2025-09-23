@@ -57,7 +57,7 @@ android {
         }
         release {
             signingConfig signingConfigs.release
-            minifyEnabled enableProguardInReleaseBuilds
+            minifyEnabled project.hasProperty('enableProguardInReleaseBuilds') ? enableProguardInReleaseBuilds.toBoolean() : false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
