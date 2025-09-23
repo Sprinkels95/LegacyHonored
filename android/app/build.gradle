@@ -82,25 +82,28 @@ dependencies {
     implementation "com.facebook.react:react-native:+"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 
-    // Voice and TTS dependencies
-    implementation project(':react-native-voice')
-    implementation project(':react-native-tts')
+    // Voice and TTS dependencies are auto-linked by React Native
+    // implementation project(':react-native-voice')
+    // implementation project(':react-native-tts')
 
-    debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
-        exclude group:'com.facebook.fbjni'
+    if (project.hasProperty('FLIPPER_VERSION')) {
+        debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
+            exclude group:'com.facebook.fbjni'
+        }
+        debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
+            exclude group:'com.facebook.flipper'
+            exclude group:'com.squareup.okhttp3', module:'okhttp'
+        }
+        debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}")
     }
-    debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
-        exclude group:'com.facebook.flipper'
-        exclude group:'com.squareup.okhttp3', module:'okhttp'
-    }
-    debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}")
 
-    if (enableHermes) {
+    if (project.hasProperty('enableHermes') && enableHermes.toBoolean()) {
         def hermesPath = "../../node_modules/hermes-engine/android/"
         debugImplementation files(hermesPath + "hermes-debug.aar")
         releaseImplementation files(hermesPath + "hermes-release.aar")
     } else {
-        implementation jscFlavor
+        // JSC is the default JS engine - no explicit dependency needed
+        // implementation jscFlavor
     }
 }
 
