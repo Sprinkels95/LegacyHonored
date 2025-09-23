@@ -20,13 +20,9 @@ steps:
 
       echo "=== Building APK ==="
       cd android
-      chmod +x gradlew
 
-      echo "=== Cleaning previous builds ==="
-      ./gradlew clean --no-daemon
-
-      echo "=== Assembling release APK ==="
-      ./gradlew assembleRelease --no-daemon --stacktrace
+      echo "=== Using Gradle directly ==="
+      gradle clean assembleRelease --no-daemon --stacktrace
 
 # Step 2: Distribute the APK to testers via Firebase App Distribution.
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
