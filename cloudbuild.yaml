@@ -1,8 +1,15 @@
 steps:
-# Step 1: Install Dependencies, Create Bundle, Fix Permissions, and Build the App
-- name: 'reactnativecommunity/react-native-android'
-  entrypoint: 'bash'
+# Build release APK using the proven React Native Android image
+- name: 'gcr.io/cloud-builders/docker'
   args:
+    - 'run'
+    - '--rm'
+    - '-v'
+    - '/workspace:/workspace'
+    - '-w'
+    - '/workspace'
+    - 'reactnativecommunity/react-native-android:latest'
+    - 'bash'
     - '-c'
     - |
       set -e
@@ -18,11 +25,13 @@ steps:
         --bundle-output android/app/src/main/assets/index.android.bundle \
         --assets-dest android/app/src/main/res
 
-      echo "=== Building APK ==="
+      echo "=== Building Release APK ==="
       cd android
+      chmod +x gradlew
+      ./gradlew assembleRelease --no-daemon --stacktrace
 
-      echo "=== Using Gradle directly ==="
-      gradle clean assembleRelease --no-daemon --stacktrace
+      echo "=== Verifying APK ==="
+      find . -name "*.apk" -type f -exec ls -la {} \;
 
 # Step 2: Distribute the APK to testers via Firebase App Distribution.
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
