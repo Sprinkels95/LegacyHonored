@@ -1,0 +1,65 @@
+steps:
+# Build release APK with guaranteed Java 17 support
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - 'run'
+    - '--rm'
+    - '-v'
+    - '/workspace:/workspace'
+    - '-w'
+    - '/workspace'
+    - 'cimg/android:2023.10'  # CircleCI Android image with Java 17
+    - 'bash'
+    - '-c'
+    - |
+      set -e
+      echo "=== Java Version Check ==="
+      java -version
+
+      echo "=== Installing Node.js ==="
+      curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+      sudo apt-get install -y nodejs
+      node --version
+      npm --version
+
+      echo "=== Installing Dependencies ==="
+      npm install --legacy-peer-deps
+
+      echo "=== Creating React Native Bundle ==="
+      mkdir -p android/app/src/main/assets
+      npx react-native bundle \
+        --platform android \
+        --dev false \
+        --entry-file index.js \
+        --bundle-output android/app/src/main/assets/index.android.bundle \
+        --assets-dest android/app/src/main/res
+
+      echo "=== Building Release APK ==="
+      cd android
+      chmod +x gradlew
+
+      echo "=== Gradle Build with Java 17 ==="
+      ./gradlew assembleRelease --no-daemon --stacktrace --info
+
+      echo "=== Verifying APK ==="
+      find . -name "*.apk" -type f -exec ls -la {} \;
+
+# Step 2: Distribute the APK to testers via Firebase App Distribution
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: 'gcloud'
+  args:
+    - 'firebase'
+    - 'appdistribution:distribute'
+    - 'android/app/build/outputs/apk/release/app-release.apk'
+    - '--app=1:53700756169:android:2f4d0891542f2c286d51d8'
+    - '--release-notes=Java 17 build successful - Firebase Auth compatibility resolved!'
+    - '--groups=testers'
+
+# Make the generated APK available as a downloadable artifact
+artifacts:
+  objects:
+    location: 'gs://memory-lane-app-469523-builds'
+    paths: ['android/app/build/outputs/apk/release/app-release.apk']
+
+# Set a generous timeout for the build
+timeout: 3600s

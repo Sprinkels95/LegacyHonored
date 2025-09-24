@@ -1,5 +1,5 @@
 steps:
-# Build release APK using Ubuntu 22.04 with guaranteed Java 17
+# Build release APK using Ubuntu with manual Android SDK and Java 17 setup
 - name: 'ubuntu:22.04'
   entrypoint: 'bash'
   args:
@@ -61,7 +61,7 @@ steps:
       echo "=== Verifying APK ==="
       find . -name "*.apk" -type f -exec ls -la {} \;
 
-# Step 2: Distribute the APK to testers via Firebase App Distribution.
+# Step 2: Distribute the APK via Firebase App Distribution
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: 'gcloud'
   args:
@@ -69,20 +69,19 @@ steps:
     - 'appdistribution:distribute'
     - 'android/app/build/outputs/apk/release/app-release.apk'
     - '--app=1:53700756169:android:2f4d0891542f2c286d51d8'
-    - '--release-notes=This build is successful. The pipeline is now fully operational.'
+    - '--release-notes=Modern Ubuntu 22.04 + Java 17 + Android SDK 33 build!'
     - '--groups=testers'
 
-# Make the generated APK available as a downloadable artifact.
+# Store build artifacts
 artifacts:
   objects:
     location: 'gs://memory-lane-app-469523-builds'
     paths: ['android/app/build/outputs/apk/release/app-release.apk']
 
-# Build options for performance
+# Build options
 options:
   machineType: 'E2_HIGHCPU_8'
   diskSizeGb: 100
   logging: CLOUD_LOGGING_ONLY
 
-# Set a generous timeout for the build
 timeout: 3600s
