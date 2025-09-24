@@ -1,52 +1,57 @@
 steps:
-# Build release APK using Ubuntu 22.04 with guaranteed Java 17
-- name: 'ubuntu:22.04'
+# Build release APK using a proven Node.js base image with Android setup
+- name: 'node:20-bullseye'
   entrypoint: 'bash'
   args:
     - '-c'
     - |
-      set -e
-      echo "=== Setting up build environment ==="
-      apt-get update -q
+      set -ex
+      echo "=== Environment Setup ==="
+      apt-get update -qq
       DEBIAN_FRONTEND=noninteractive apt-get install -y \
-        curl wget unzip openjdk-17-jdk-headless git build-essential
+        wget unzip openjdk-17-jdk-headless git build-essential \
+        ca-certificates gnupg lsb-release
 
       echo "=== Java Version Verification ==="
       export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
       export PATH=$$JAVA_HOME/bin:$$PATH
       java -version
-
-      echo "=== Installing Node.js 20 ==="
-      curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-      apt-get install -y nodejs
-      node --version
-      npm --version
+      echo "Node version: $$(node --version)"
+      echo "NPM version: $$(npm --version)"
 
       echo "=== Installing Android SDK ==="
-      mkdir -p /android-sdk
-      cd /android-sdk
-      wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-      unzip -q commandlinetools-linux-9477386_latest.zip
-      mkdir -p cmdline-tools/latest
-      mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
-
       export ANDROID_SDK_ROOT=/android-sdk
       export ANDROID_HOME=$$ANDROID_SDK_ROOT
+      mkdir -p $$ANDROID_SDK_ROOT
+      cd $$ANDROID_SDK_ROOT
+
+      echo "Downloading Android command line tools..."
+      wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+      unzip -q commandlinetools-linux-9477386_latest.zip
+      rm commandlinetools-linux-9477386_latest.zip
+
+      echo "Setting up command line tools structure..."
+      mkdir -p cmdline-tools/latest
+      mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
+      rmdir cmdline-tools || true
+
       export PATH=$$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$$ANDROID_SDK_ROOT/platform-tools:$$PATH
 
       echo "=== Installing Android SDK components ==="
-      yes | sdkmanager --licenses || true
-      sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+      echo "Installing SDK manager components..."
+      yes | sdkmanager --licenses 2>/dev/null || true
+      sdkmanager --install \
+        "platform-tools" \
+        "platforms;android-33" \
+        "build-tools;33.0.0" \
+        "cmdline-tools;latest"
 
       echo "=== Building React Native App ==="
       cd /workspace
-
-      echo "=== Fixing workspace permissions ==="
-      chown -R root:root /workspace
-      chmod -R 755 /workspace
+      ls -la
 
       echo "=== Installing Dependencies ==="
-      npm install --legacy-peer-deps
+      npm ci --legacy-peer-deps --cache /tmp/.npm
 
       echo "=== Creating React Native Bundle ==="
       mkdir -p android/app/src/main/assets
@@ -59,8 +64,8 @@ steps:
 
       echo "=== Building Release APK ==="
       cd android
-      chmod +x gradlew
-      ./gradlew assembleRelease --no-daemon --stacktrace
+      chmod +x ./gradlew
+      ./gradlew assembleRelease --no-daemon --stacktrace --info
 
       echo "=== Verifying APK ==="
       find . -name "*.apk" -type f -exec ls -la {} \;
