@@ -13,7 +13,7 @@ steps:
 
       echo "=== Java Version Verification ==="
       export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-      export PATH=$JAVA_HOME/bin:$PATH
+      export PATH=$$JAVA_HOME/bin:$$PATH
       java -version
 
       echo "=== Installing Node.js 20 ==="
@@ -31,8 +31,8 @@ steps:
       mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
 
       export ANDROID_SDK_ROOT=/android-sdk
-      export ANDROID_HOME=$ANDROID_SDK_ROOT
-      export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
+      export ANDROID_HOME=$$ANDROID_SDK_ROOT
+      export PATH=$$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$$ANDROID_SDK_ROOT/platform-tools:$$PATH
 
       echo "=== Installing Android SDK components ==="
       yes | sdkmanager --licenses || true
@@ -42,7 +42,7 @@ steps:
       cd /workspace
 
       echo "=== Fixing workspace permissions ==="
-      chown -R $(whoami):$(whoami) /workspace
+      chown -R root:root /workspace
       chmod -R 755 /workspace
 
       echo "=== Installing Dependencies ==="

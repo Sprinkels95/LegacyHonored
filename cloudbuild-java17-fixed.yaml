@@ -23,7 +23,7 @@ steps:
       npm --version
 
       echo "=== Fixing workspace permissions ==="
-      sudo chown -R $(whoami):$(whoami) /workspace
+      sudo chown -R root:root /workspace
       sudo chmod -R 755 /workspace
 
       echo "=== Installing Dependencies ==="
