@@ -1,0 +1,34 @@
+steps:
+# Debug build to identify where the failure occurs
+- name: 'node:20-bullseye'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      set -ex
+      echo "=== Step 1: Basic Environment Check ==="
+      whoami
+      pwd
+      ls -la /workspace
+      node --version
+      npm --version
+
+      echo "=== Step 2: Java Installation ==="
+      apt-get update -qq
+      DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-17-jdk-headless
+
+      echo "=== Step 3: Java Verification ==="
+      export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      export PATH=$$JAVA_HOME/bin:$$PATH
+      java -version
+
+      echo "=== Step 4: Install Basic Tools ==="
+      DEBIAN_FRONTEND=noninteractive apt-get install -y wget unzip
+
+      echo "=== Step 5: Test npm install ==="
+      cd /workspace
+      npm install --legacy-peer-deps --verbose
+
+      echo "=== Debug build completed successfully ==="
+
+timeout: 1800s
