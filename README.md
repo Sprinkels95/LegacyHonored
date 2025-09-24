@@ -65,33 +65,6 @@ Choose from 9 unique personality companions to make medication reminders more en
 
 ## 🚀 Deployment & Next Steps
 
-### Current Status: Ready for Automated Distribution via Firebase
-
-The app and its infrastructure are configured for a fully automated build and distribution pipeline using Google Cloud Build and Firebase App Distribution. This provides a robust, reliable, and repeatable process for creating and distributing test builds.
-
-### The Build Process
-
-The core of our build process is the `cloudbuild.yaml` file, which orchestrates a multi-step build on Google Cloud:
-
-1.  **Custom Build Environment**: The build starts by using `Dockerfile.android` to create a custom Docker image. This image contains all the necessary tools and dependencies for a React Native Android build, including Node.js, the Android SDK, and Gradle. This eliminates environment inconsistencies.
-2.  **Build Execution**: The build then runs inside this custom container. It installs npm dependencies and executes the standard Android Gradle build (`./gradlew assembleRelease`) to create the APK.
-3.  **Automated Distribution**: Once the APK is successfully built, it is automatically uploaded to Firebase App Distribution and sent to the "testers" group.
-
-#### **How to Trigger a New Build and Distribution:**
-
-1.  **Ensure you are authenticated with Google Cloud:**
-    ```bash
-    gcloud auth login
-    gcloud config set project memory-lane-app-469523
-    ```
-
-2.  **Submit the build to Google Cloud Build:**
-    ```bash
-    gcloud builds submit --config cloudbuild.yaml .
-    ```
-
-This single command will build the app, create the APK, and distribute it to all registered testers in Firebase.
-
 #### **Testing Phase (Est. 1-2 weeks):**
 - Testers will receive an email notification from Firebase App Distribution to download the new build.
 - Install on Wade's Android device.
