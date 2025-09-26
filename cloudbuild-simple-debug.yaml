@@ -1,0 +1,46 @@
+steps:
+  # Build debug APK using a comprehensive Android image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'run'
+      - '--rm'
+      - '-v'
+      - '/workspace:/workspace'
+      - '-w'
+      - '/workspace'
+      - 'reactnativecommunity/react-native-android:latest'
+      - 'bash'
+      - '-c'
+      - |
+        echo "Building LegacyHonored APK for Wade's testing..."
+
+        # Install dependencies
+        npm install --legacy-peer-deps
+
+        # Ensure bundle directory exists
+        mkdir -p android/app/src/main/assets
+
+        # Create React Native bundle
+        npx react-native bundle \
+          --platform android \
+          --dev false \
+          --entry-file index.js \
+          --bundle-output android/app/src/main/assets/index.android.bundle \
+          --assets-dest android/app/src/main/res
+
+        # Build debug APK (easier for testing)
+        cd android
+        chmod +x gradlew
+        ./gradlew assembleDebug --no-daemon --stacktrace
+
+        # List generated files
+        echo "=== Generated APK Files ==="
+        find . -name "*.apk" -type f -exec ls -la {} \;
+
+# Store the debug APK for download
+artifacts:
+  objects:
+    location: 'gs://memory-lane-app-469523-builds-1758588886'
+    paths: ['android/app/build/outputs/apk/debug/*.apk']
+
+timeout: 1800s

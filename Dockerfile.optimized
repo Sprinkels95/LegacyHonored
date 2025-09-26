@@ -1,0 +1,67 @@
+# Optimized React Native Android Builder
+FROM node:20-bullseye
+
+# Install essential system dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    unzip \
+    curl \
+    git \
+    python3 \
+    python3-pip \
+    build-essential \
+    openjdk-11-jdk \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set JAVA_HOME environment variable
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+ENV PATH=$PATH:$JAVA_HOME/bin
+
+# Setup Android SDK environment
+ENV ANDROID_HOME=/opt/android-sdk
+ENV ANDROID_SDK_ROOT=/opt/android-sdk
+ENV PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/33.0.0
+
+# Download and install Android Command Line Tools
+RUN mkdir -p $ANDROID_HOME/cmdline-tools && \
+    cd /tmp && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip && \
+    unzip -q commandlinetools-linux-9477386_latest.zip && \
+    mv cmdline-tools $ANDROID_HOME/cmdline-tools/latest && \
+    rm commandlinetools-linux-9477386_latest.zip
+
+# Accept Android SDK licenses and install required packages
+RUN yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses && \
+    $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+        "platform-tools" \
+        "platforms;android-33" \
+        "build-tools;33.0.0" \
+        "extras;google;google_play_services" \
+        "extras;android;m2repository" \
+        "extras;google;m2repository"
+
+# Install Gradle 8.x for better compatibility
+RUN wget -q https://services.gradle.org/distributions/gradle-8.3-bin.zip && \
+    unzip -q gradle-8.3-bin.zip -d /opt && \
+    rm gradle-8.3-bin.zip
+ENV PATH=$PATH:/opt/gradle-8.3/bin
+
+# Install React Native CLI globally
+RUN npm install -g @react-native-community/cli
+
+# Set working directory
+WORKDIR /workspace
+
+# Copy and set permissions for gradle wrapper
+COPY android/gradlew android/gradlew
+COPY android/gradle android/gradle
+RUN chmod +x android/gradlew
+
+# Verify installations
+RUN echo "=== Build Environment Verification ===" && \
+    node --version && \
+    npm --version && \
+    java -version && \
+    gradle --version && \
+    echo "Android SDK: $ANDROID_SDK_ROOT" && \
+    ls -la $ANDROID_SDK_ROOT

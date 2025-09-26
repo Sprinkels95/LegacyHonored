@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "53700756169",
+    "project_id": "memory-lane-app-469523",
+    "storage_bucket": "memory-lane-app-469523.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:53700756169:android:2f4d0891542f2c286d51d8",
+        "android_client_info": {
+          "package_name": "com.memorylane.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "YOUR_FIREBASE_API_KEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

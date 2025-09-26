@@ -1,0 +1,52 @@
+steps:
+# Debug Android SDK setup step by step
+- name: 'node:20-bullseye'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      set -ex
+      echo "=== Step 1: Environment Setup ==="
+      apt-get update -qq
+      DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        wget unzip openjdk-17-jdk-headless git build-essential
+
+      echo "=== Step 2: Environment Verification ==="
+      export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      export PATH=$$JAVA_HOME/bin:$$PATH
+      java -version
+      echo "Node: $$(node --version)"
+      echo "NPM: $$(npm --version)"
+
+      echo "=== Step 3: NPM Install (Known Working) ==="
+      cd /workspace
+      npm install --legacy-peer-deps
+
+      echo "=== Step 4: Test Android SDK Download ==="
+      export ANDROID_SDK_ROOT=/opt/android-sdk
+      export ANDROID_HOME=$$ANDROID_SDK_ROOT
+      mkdir -p $$ANDROID_SDK_ROOT
+      cd $$ANDROID_SDK_ROOT
+
+      echo "Downloading..."
+      wget -O cmdtools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+      ls -la
+
+      echo "=== Step 5: Test Unzip ==="
+      unzip -q cmdtools.zip
+      ls -la
+
+      echo "=== Step 6: Test Directory Structure ==="
+      ls -la cmdline-tools/
+      mkdir -p cmdline-tools/latest
+      mv cmdline-tools/* cmdline-tools/latest/ || echo "Move failed, continuing..."
+      ls -la cmdline-tools/latest/
+
+      echo "=== Step 7: Test SDK Manager ==="
+      export PATH=$$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$$PATH
+      which sdkmanager || echo "sdkmanager not found in PATH"
+      ls -la cmdline-tools/latest/bin/
+
+      echo "=== All steps completed successfully ==="
+
+timeout: 1800s
